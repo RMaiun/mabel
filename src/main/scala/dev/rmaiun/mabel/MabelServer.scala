@@ -19,17 +19,6 @@ import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService}
 object MabelServer {
 
   def stream[F[_]: Async]: Stream[F, Nothing] = {
-    val trustingSslContext: SSLContext = {
-      val trustManager = new X509TrustManager {
-        def getAcceptedIssuers(): Array[X509Certificate] = Array.empty
-        def checkClientTrusted(certs: Array[X509Certificate], authType: String): Unit = {}
-        def checkServerTrusted(certs: Array[X509Certificate], authType: String): Unit = {}
-      }
-      val sslContext = SSLContext.getInstance("TLS")
-      sslContext.init(null, Array(trustManager), new SecureRandom)
-      sslContext
-    }
-//  val z = TLSContext.Builder.forAsync[F].fromSSLContext(trustingSslContext)
 val clientEC: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(Executors.newCachedThreadPool())
 
     for {
