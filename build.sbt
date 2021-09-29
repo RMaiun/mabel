@@ -19,9 +19,12 @@ lazy val root = (project in file("."))
       "org.scalameta" %% "munit"               % MunitVersion           % Test,
       "org.typelevel" %% "munit-cats-effect-3" % MunitCatsEffectVersion % Test,
       "ch.qos.logback" % "logback-classic"     % LogbackVersion,
-      "dev.zio"       %% "zio"                 % "2.0.0-M3",
-      "dev.zio"       %% "zio-streams"         % "2.0.0-M3",
-      "dev.zio"       %% "zio-interop-cats"    % "3.1.1.0"
+      "dev.zio"       %% "zio"                 % "1.0.12",
+      "dev.zio"       %% "zio-streams"         % "1.0.12",
+      "dev.zio"       %% "zio-interop-cats"    % "3.1.1.0",
+      "dev.zio"       %% "zio-logging"         % "0.5.12",
+      "dev.zio"       %% "zio-logging-slf4j"   % "0.5.12",
+      "nl.vroste"     %% "zio-amqp"            % "0.2.2"
     ),
     addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.0" cross CrossVersion.full),
     addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1"),

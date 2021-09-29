@@ -1,14 +1,14 @@
 package dev.rmaiun.mabel.services
 
 import dev.rmaiun.mabel.dtos.ArbiterDto.codec._
-import dev.rmaiun.mabel.dtos.ArbiterDto.{GetRealmDtoIn, GetRealmDtoOut, RegisterUserDtoIn, RegisterUserDtoOut}
-import io.circe.{Decoder, Encoder}
+import dev.rmaiun.mabel.dtos.ArbiterDto.{ GetRealmDtoIn, GetRealmDtoOut, RegisterUserDtoIn, RegisterUserDtoOut }
+import io.circe.{ Decoder, Encoder }
 import org.http4s.circe._
 import org.http4s.client.Client
 import org.http4s.implicits._
-import org.http4s.{EntityDecoder, EntityEncoder}
-import zio.{Task, _}
+import org.http4s.{ EntityDecoder, EntityEncoder }
 import zio.interop.catz._
+import zio.{ Task, _ }
 
 object ArbiterClient {
   type HasArbiterClient = Has[ArbiterClient.Service]
@@ -30,6 +30,5 @@ object ArbiterClient {
 
   }
 
-  val live: URLayer[Has[Client[Task]], HasArbiterClient] =
-    (ArbiterClientService(_)).toLayer
+  val layer: URLayer[Has[Client[Task]], HasArbiterClient] = (ArbiterClientService(_)).toLayer
 }
