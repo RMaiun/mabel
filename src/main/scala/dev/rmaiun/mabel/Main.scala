@@ -1,13 +1,12 @@
 package dev.rmaiun.mabel
 
 import cats.effect._
-import dev.rmaiun.mabel.services.layers
-import dev.rmaiun.mabel.services.layers.AppEnv
+import layers.AppEnv
 import org.http4s.HttpApp
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.Router
 import zio.interop.catz._
-import zio.{ ExitCode => ZExitCode, _ }
+import zio.{ExitCode => ZExitCode, _}
 
 object Main extends App {
 

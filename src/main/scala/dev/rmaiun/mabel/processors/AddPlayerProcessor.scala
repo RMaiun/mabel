@@ -8,7 +8,7 @@ import dev.rmaiun.mabel.processors.Constants._
 import dev.rmaiun.mabel.services.ArbiterClient.HasArbiterClient
 import dev.rmaiun.mabel.services.{ ArbiterClient, IdGenerator }
 import zio._
-case class AddPlayerProcessor(arbiterClient: ArbiterClient.Service) extends CmdProcessor {
+case class AddPlayerProcessor(arbiterClient: ArbiterClient.Service) extends Processor {
 
   override def process(input: BotRequest): Task[ProcessorResponse] =
     for {

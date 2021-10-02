@@ -4,7 +4,7 @@ import dev.rmaiun.mabel.dtos.{BotRequest, ProcessorResponse}
 import zio.Task
 import io.circe.{Decoder, Json}
 
-trait CmdProcessor {
+trait Processor {
   def process(input: BotRequest): Task[ProcessorResponse]
 
   protected def parseDto[T](body: Option[Json])(implicit d: Decoder[T]): Task[T] =
