@@ -17,7 +17,18 @@ object ArbiterDto {
   case class UpdateRealmAlgorithmDtoIn(id: Long, algorithm: String)
   case class UpdateRealmAlgorithmDtoOut(realm: RealmDto)
 
+  case class GameHistoryDtoIn(
+    realm: String,
+    season: String,
+    w1: String,
+    w2: String,
+    l1: String,
+    l2: String,
+    shutout: Boolean = false
+  )
+
   case class GameHistoryDto(
+    id: Long,
     realm: String,
     season: String,
     w1: String,
@@ -36,20 +47,20 @@ object ArbiterDto {
     shutout: Boolean = false,
     createdAt: ZonedDateTime
   )
+  case class RealmShortInfo(name: String, role: String, botUsage: Boolean)
 
   case class EloPointsDto(user: String, value: Int, created: ZonedDateTime)
+  case class CalculatedEloPointsDto(user: String, value: Int, gamesPlayed: Int)
 
-  case class AddGameHistoryDtoIn(historyElement: GameHistoryDto, moderatorTid: Long)
+  case class AddGameHistoryDtoIn(historyElement: GameHistoryDtoIn, moderatorTid: Long)
   case class AddGameHistoryDtoOut(storedRound: GameHistoryDto)
 
   case class AddEloPointsDtoIn(points: EloPointsDto, moderatorTid: Long)
   case class AddEloPointsDtoOut(id: Long)
 
-  case class ListGameHistoryDtoIn(realm: String, season: String)
   case class ListGameHistoryDtoOut(games: List[StoredGameHistoryDto])
 
-  case class ListEloPointsDtoIn(users: Option[List[String]])
-  case class ListEloPointsDtoOut(calculatedEloPoints: List[EloPointsDto], unratedPlayers: List[String] = Nil)
+  case class ListEloPointsDtoOut(calculatedEloPoints: List[CalculatedEloPointsDto], unratedPlayers: List[String] = Nil)
 
   case class UserDto(
     id: Long,
@@ -64,32 +75,7 @@ object ArbiterDto {
   case class RegisterUserDtoIn(user: UserData, moderatorTid: Long)
   case class RegisterUserDtoOut(user: UserDto)
 
-  case class FindAllUsersDtoIn(realm: String, activeStatus: Option[Boolean])
-  case class FindAllUsersDtoOut(items: List[UserDto])
-
-  case class FindUserDtoIn(surname: Option[String] = None, tid: Option[Long] = None)
-  case class FindUserDtoOut(user: UserDto)
-
-  case class AssignUserToRealmDtoIn(
-    user: String,
-    realm: String,
-    role: Option[String],
-    switchAsActive: Option[Boolean],
-    moderatorTid: Long
-  )
-  case class AssignUserToRealmDtoOut(
-    user: String,
-    realm: String,
-    role: String,
-    assignedAt: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC),
-    switchedAsActive: Option[Boolean]
-  )
-
-  case class SwitchActiveRealmDtoIn(user: String, realm: String, moderatorTid: Long)
-  case class SwitchActiveRealmDtoOut(activeRealm: String)
-
-  case class ProcessActivationDtoIn(users: List[String], moderatorTid: Long, realm: String, activate: Boolean)
-  case class ProcessActivationDtoOut(users: List[String], activationStatus: Boolean)
+  case class FindUserDtoOut(user: UserDto, realms: List[RealmShortInfo])
 
   case class LinkTidDtoIn(tid: Long, nameToLink: String, moderatorTid: Long, realm: String)
   case class LinkTidDtoOut(
@@ -111,10 +97,37 @@ object ArbiterDto {
     implicit val UserDtoEncoder: Encoder[UserDto] = deriveEncoder[UserDto]
     implicit val UserDtoDecoder: Decoder[UserDto] = deriveDecoder[UserDto]
 
+    implicit val EloPointsDtoEncoder: Encoder[EloPointsDto] = deriveEncoder[EloPointsDto]
+    implicit val EloPointsDtoDecoder: Decoder[EloPointsDto] = deriveDecoder[EloPointsDto]
+
+    implicit val RealmShortInfoEncoder: Encoder[RealmShortInfo] = deriveEncoder[RealmShortInfo]
+    implicit val RealmShortInfoDecoder: Decoder[RealmShortInfo] = deriveDecoder[RealmShortInfo]
+
+    implicit val StoredGameHistoryDtoEncoder: Encoder[StoredGameHistoryDto] = deriveEncoder[StoredGameHistoryDto]
+    implicit val StoredGameHistoryDtoDecoder: Decoder[StoredGameHistoryDto] = deriveDecoder[StoredGameHistoryDto]
+
+    implicit val CalculatedEloPointsDtoEncoder: Encoder[CalculatedEloPointsDto] = deriveEncoder[CalculatedEloPointsDto]
+    implicit val CalculatedEloPointsDtoDecoder: Decoder[CalculatedEloPointsDto] = deriveDecoder[CalculatedEloPointsDto]
+
+    implicit val GameHistoryDtoInEncoder: Encoder[GameHistoryDtoIn] = deriveEncoder[GameHistoryDtoIn]
+    implicit val GameHistoryDtoDecoder: Decoder[GameHistoryDto] = deriveDecoder[GameHistoryDto]
+
     implicit val GetRealmDtoInEncoder: Encoder[GetRealmDtoIn]   = deriveEncoder[GetRealmDtoIn]
     implicit val GetRealmDtoOutDecoder: Decoder[GetRealmDtoOut] = deriveDecoder[GetRealmDtoOut]
 
     implicit val RegisterUserDtoInEncoder: Encoder[RegisterUserDtoIn]   = deriveEncoder[RegisterUserDtoIn]
     implicit val RegisterUserDtoOutDecoder: Decoder[RegisterUserDtoOut] = deriveDecoder[RegisterUserDtoOut]
+
+    implicit val AddGameHistoryDtoInEncoder: Encoder[AddGameHistoryDtoIn]   = deriveEncoder[AddGameHistoryDtoIn]
+    implicit val AddGameHistoryDtoOutDecoder: Decoder[AddGameHistoryDtoOut] = deriveDecoder[AddGameHistoryDtoOut]
+
+    implicit val AddEloPointsDtoInEncoder: Encoder[AddEloPointsDtoIn]   = deriveEncoder[AddEloPointsDtoIn]
+    implicit val AddEloPointsDtoOutDecoder: Decoder[AddEloPointsDtoOut] = deriveDecoder[AddEloPointsDtoOut]
+
+    implicit val ListEloPointsDtoOutDecoder: Decoder[ListEloPointsDtoOut] = deriveDecoder[ListEloPointsDtoOut]
+
+    implicit val ListGameHistoryDtoOutDecoder: Decoder[ListGameHistoryDtoOut] = deriveDecoder[ListGameHistoryDtoOut]
+
+    implicit val FindUserDtoOutDecoder: Decoder[FindUserDtoOut] = deriveDecoder[FindUserDtoOut]
   }
 }

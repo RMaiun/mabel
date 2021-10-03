@@ -4,9 +4,9 @@ import dev.rmaiun.mabel.commands.AddPlayerCmd
 import dev.rmaiun.mabel.commands.AddPlayerCmd._
 import dev.rmaiun.mabel.dtos.ArbiterDto.{ RegisterUserDtoIn, UserData }
 import dev.rmaiun.mabel.dtos.{ BotRequest, BotResponse, ProcessorResponse }
-import dev.rmaiun.mabel.processors.Constants._
 import dev.rmaiun.mabel.services.ArbiterClient.HasArbiterClient
 import dev.rmaiun.mabel.services.{ ArbiterClient, IdGenerator }
+import dev.rmaiun.mabel.utils.Constants.{ PREFIX, SUFFIX }
 import zio._
 case class AddPlayerProcessor(arbiterClient: ArbiterClient.Service) extends Processor {
 

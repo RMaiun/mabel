@@ -5,17 +5,19 @@ import layers.AppEnv
 import org.http4s.HttpApp
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.Router
+import org.slf4j.LoggerFactory
 import zio.interop.catz._
 import zio.{ExitCode => ZExitCode, _}
 
 object Main extends App {
 
   type AppTask[A] = RIO[layers.AppEnv, A]
+  private val log = LoggerFactory.getLogger(Main.getClass)
 
   override def run(args: List[String]): ZIO[ZEnv, Nothing, ZExitCode] = {
     val prog =
       for {
-        _ <- logging.log.info(s"Starting ...")
+        _ <- Task.effect(log.info("Starting ..."))
         httpApp = Router[AppTask](
                     "/sys" -> PingRoutes.routes
                   ).orNotFound

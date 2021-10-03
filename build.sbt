@@ -1,7 +1,7 @@
 val Http4sVersion          = "0.23.4"
 val CirceVersion           = "0.14.1"
 val MunitVersion           = "0.7.27"
-val LogbackVersion         = "1.2.5"
+val LogbackVersion         = "1.2.6"
 val MunitCatsEffectVersion = "1.0.5"
 
 lazy val root = (project in file("."))
@@ -19,11 +19,10 @@ lazy val root = (project in file("."))
       "org.scalameta" %% "munit"               % MunitVersion           % Test,
       "org.typelevel" %% "munit-cats-effect-3" % MunitCatsEffectVersion % Test,
       "ch.qos.logback" % "logback-classic"     % LogbackVersion,
+      "org.slf4j"      % "slf4j-api"           % "1.7.32",
       "dev.zio"       %% "zio"                 % "1.0.12",
       "dev.zio"       %% "zio-streams"         % "1.0.12",
       "dev.zio"       %% "zio-interop-cats"    % "3.1.1.0",
-      "dev.zio"       %% "zio-logging"         % "0.5.12",
-      "dev.zio"       %% "zio-logging-slf4j"   % "0.5.12",
       "nl.vroste"     %% "zio-amqp"            % "0.2.2"
     ),
     addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.0" cross CrossVersion.full),
