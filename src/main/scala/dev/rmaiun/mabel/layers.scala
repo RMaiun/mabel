@@ -1,10 +1,13 @@
 package dev.rmaiun.mabel
 
-import dev.rmaiun.mabel.processors.AddPlayerProcessor
+import dev.rmaiun.mabel.Main.{ consumerEffect, processorEffect }
 import dev.rmaiun.mabel.processors.AddPlayerProcessor.HasAddPlayerProcessor
+import dev.rmaiun.mabel.processors.{ AddPlayerProcessor, AddRoundProcessor }
+import dev.rmaiun.mabel.services.CommandHandler.HasCommandHandler
 import dev.rmaiun.mabel.services.PingManager.HasPingManager
 import dev.rmaiun.mabel.services.ProcessorStrategy.HasProcessorStrategy
-import dev.rmaiun.mabel.services.{ ArbiterClient, Http4sClient, PingManager, ProcessorStrategy }
+import dev.rmaiun.mabel.services._
+import nl.vroste.zio.amqp.Channel
 import org.http4s.client.Client
 import zio.blocking.Blocking
 import zio.clock.Clock
@@ -17,19 +20,28 @@ object layers {
   type Layer1Env = Layer0Env with HasPingManager
   type Layer2Env = Layer1Env with HasAddPlayerProcessor
   type Layer3Env = Layer2Env with HasProcessorStrategy
-  type AppEnv    = HasProcessorStrategy with HasPingManager with Clock with Blocking
+  type AppEnv    = HasCommandHandler with HasPingManager with Clock with Blocking with Console with Has[Channel]
 
   object live {
-    private lazy val http4sClient           = Http4sClient.Http4sClientLive.layer
-    private lazy val arbiterClient          = http4sClient >>> ArbiterClient.layer
-    private lazy val pingManager            = (Console.live ++ Clock.live) >>> PingManager.layer
-    private lazy val addPlayerProcessor     = arbiterClient >>> AddPlayerProcessor.layer
-    private lazy val processorStrategyLayer = addPlayerProcessor >>> ProcessorStrategy.layer
+    private lazy val http4sClient        = Http4sClient.Http4sClientLive.layer
+    private lazy val arbiterClient       = http4sClient >>> ArbiterClient.layer
+    private lazy val eloPointsCalculator = arbiterClient >>> EloPointsCalculator.layer
+    private lazy val pingManager         = (Console.live ++ Clock.live) >>> PingManager.layer
+    private lazy val addPlayerProcessor  = arbiterClient >>> AddPlayerProcessor.layer
+    private lazy val addRoundProcessor   = (arbiterClient ++ eloPointsCalculator) >>> AddRoundProcessor.layer
+    private lazy val processorStrategy   = (addPlayerProcessor ++ addRoundProcessor) >>> ProcessorStrategy.layer
+    private lazy val commandHandler      = processorStrategy >>> CommandHandler.layer
+
+    private lazy val publisher = Blocking.live >>> ZLayer.fromManaged(processorEffect)
+//    private lazy val consumer  = (Blocking.live ++ Console.live) >>> consumerEffect.toLayer
     lazy val appLayer: ZLayer[Any, Throwable, AppEnv] = {
-      processorStrategyLayer ++
+      commandHandler ++
         pingManager ++
+        Console.live ++
         Clock.live ++
-        Blocking.live
+        Blocking.live ++
+//        consumer ++
+        publisher
     }
   }
 }
