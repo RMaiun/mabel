@@ -2,18 +2,20 @@ package dev.rmaiun.mabel
 
 import cats.effect._
 import dev.rmaiun.mabel.dtos.BotRequest
-import layers.AppEnv
+import dev.rmaiun.mabel.layers.AppEnv
 import nl.vroste.zio.amqp.{Amqp, Channel}
 import org.http4s.HttpApp
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.server.Router
 import org.slf4j.LoggerFactory
+import zio.ZManaged.Finalizer
 import zio.blocking.Blocking
 import zio.console.{Console, putStrLn}
 import zio.interop.catz._
 import zio.{ExitCode => ZExitCode, _}
 
 import java.net.URI
+import scala.util.Random
 
 object Main extends App {
 
@@ -23,9 +25,14 @@ object Main extends App {
   override def run(args: List[String]): ZIO[ZEnv, Nothing, ZExitCode] = {
     val prog =
       for {
-        _ <- Task.effect(log.info("Starting ..."))
-        _ <- publisher
-        _ <- consumerEffect
+        _        <- Task.effect(log.info("Starting ..."))
+        _        <- publisher
+        _        <- publisher
+        channels <- channelsM.use(ch => Task.succeed(ch))
+        p <- p2
+        _ <- bla(p)
+        _ <- bla(p)
+        _        <- consumerEffect
         httpApp = Router[AppTask](
                     "/sys" -> PingRoutes.routes
                   ).orNotFound
@@ -36,6 +43,15 @@ object Main extends App {
     prog
       .provideSomeLayer(layers.live.appLayer)
       .orDie
+  }
+  private def bla(c:Channel):Task[Unit] = {
+    for{
+     _ <- Task.effect(println(c))
+    _ <- Task.effect(c.publish(
+      "",
+      BotRequest.BotRequestEncoder(BotRequest("addRound", "x1", 123, "bla")).toString().getBytes,
+      "input_q"))
+    }yield ()
   }
 
   def runHttp(
@@ -54,16 +70,26 @@ object Main extends App {
         .drain
     }
   }
-case class Channels(pCh:Channel, cCh:Channel)
+  case class Channels(pCh: Channel, cCh: Channel)
+  case class ChannelWrapper(c:Channel, int:Int)
 
   val channelsM: ZManaged[Blocking, Throwable, Channels] = for {
     connection <- Amqp.connect(URI.create("amqp://rabbitmq:rabbitmq@localhost:5672/arbiter?adminPort=15672"))
-    channel1    <- Amqp.createChannel(connection)
-    channel2    <- Amqp.createChannel(connection)
+    channel1   <- Amqp.createChannel(connection)
+    channel2   <- Amqp.createChannel(connection)
   } yield Channels(channel1, channel2)
 
-  val processorEffect: ZManaged[Blocking, Throwable, Channel] = channelsM.map(_.pCh)
-  val publisher: ZIO[Blocking, Throwable, Unit] = processorEffect.use(ch => ch.publish("",BotRequest.BotRequestEncoder(BotRequest("addRound","x1",123,"bla")).toString().getBytes, "input_q"))
+  val processorEffect: ZManaged[Blocking, Throwable, ChannelWrapper] = channelsM.map(_.pCh).map(x => ChannelWrapper(x, Random.nextInt()))
+  val publisher: ZIO[Blocking, Throwable, Unit] = processorEffect.use { ch =>
+    println(ch.toString)
+    ch.c.publish(
+      "",
+      BotRequest.BotRequestEncoder(BotRequest("addRound", "x1", 123, "bla")).toString().getBytes,
+      "input_q"
+    )
+  }
+
+  val p2 =  channelsM.map(_.pCh).useNow
 
   val consumerEffect: ZIO[Blocking with Console, Throwable, Unit] = channelsM.map(_.cCh).use { channel =>
     channel

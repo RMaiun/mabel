@@ -24,6 +24,7 @@ lazy val root = (project in file("."))
       "dev.zio"       %% "zio"                 % "1.0.12",
       "dev.zio"       %% "zio-streams"         % "1.0.12",
       "dev.zio"       %% "zio-interop-cats"    % "3.1.1.0",
+      "dev.zio"       %% "zio-streams"         % "1.0.12",
       "nl.vroste"     %% "zio-amqp"            % "0.2.2"
     ),
     addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.0" cross CrossVersion.full),
