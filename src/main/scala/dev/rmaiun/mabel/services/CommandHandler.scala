@@ -15,30 +15,28 @@ object CommandHandler {
   val layer: URLayer[HasProcessorStrategy, HasCommandHandler] = (CommandHandlerService(_)).toLayer
 
   trait Service {
-    def process(record: Delivery): Task[Unit]
+    def process(record: Delivery): Task[String]
   }
   case class CommandHandlerService(strategy: ProcessorStrategy.Service) extends Service {
     import dev.rmaiun.mabel.dtos.BotRequest._
-    override def process(record: Delivery): Task[Unit] = {
+    override def process(record: Delivery): Task[String] = {
       val start = System.currentTimeMillis
       val x = parse(new String(record.getBody)).getOrElse(Json.fromBoolean(true))
       val value = BotRequestDecoder.decodeJson(x)
       val flow = for {
-//        json      <- Task.fromEither(parse(new String(record.getBody)))
-//        _ <- Log.info(json.toString())
+        json      <- Task.fromEither(parse(new String(record.getBody)))
+        _ <- Log.info(json.toString())
         input     <- Task.fromEither(value)
         _ <- Log.info(input.toString)
         processor <- strategy.selectProcessor(input.cmd)
         result    <- processor.process(input)
         _         <- Log.info(result.botResponse.result)
-      } yield ()
+      } yield "OK"
 
-      flow.fold(
-        err => Log.error(err),
-        x => Log.info("ok"))
+      flow.catchAll(err => Task.succeed(err.getMessage))
     }
   }
 
-  def process(record: Delivery): RIO[HasCommandHandler, Unit] =
-    ZIO.access(_.get.process(record))
+  def process(record: Delivery): RIO[HasCommandHandler, String] =
+    ZIO.accessM(_.get.process(record))
 }

@@ -87,6 +87,21 @@ object ArbiterDto {
   case class FindAvailableRealmsDtoIn(surname: String)
   case class FindAvailableRealmsDtoOut(availableRealms: List[RealmDto])
 
+  case class AssignUserToRealmDtoIn(
+    user: String,
+    realm: String,
+    role: Option[String],
+    switchAsActive: Option[Boolean],
+    moderatorTid: Long
+  )
+  case class AssignUserToRealmDtoOut(
+    user: String,
+    realm: String,
+    role: String,
+    assignedAt: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC),
+    switchedAsActive: Option[Boolean]
+  )
+
   object codec {
     implicit val RealmDtoEncoder: Encoder[RealmDto] = deriveEncoder[RealmDto]
     implicit val RealmDtoDecoder: Decoder[RealmDto] = deriveDecoder[RealmDto]
@@ -110,7 +125,7 @@ object ArbiterDto {
     implicit val CalculatedEloPointsDtoDecoder: Decoder[CalculatedEloPointsDto] = deriveDecoder[CalculatedEloPointsDto]
 
     implicit val GameHistoryDtoInEncoder: Encoder[GameHistoryDtoIn] = deriveEncoder[GameHistoryDtoIn]
-    implicit val GameHistoryDtoDecoder: Decoder[GameHistoryDto] = deriveDecoder[GameHistoryDto]
+    implicit val GameHistoryDtoDecoder: Decoder[GameHistoryDto]     = deriveDecoder[GameHistoryDto]
 
     implicit val GetRealmDtoInEncoder: Encoder[GetRealmDtoIn]   = deriveEncoder[GetRealmDtoIn]
     implicit val GetRealmDtoOutDecoder: Decoder[GetRealmDtoOut] = deriveDecoder[GetRealmDtoOut]
@@ -129,5 +144,10 @@ object ArbiterDto {
     implicit val ListGameHistoryDtoOutDecoder: Decoder[ListGameHistoryDtoOut] = deriveDecoder[ListGameHistoryDtoOut]
 
     implicit val FindUserDtoOutDecoder: Decoder[FindUserDtoOut] = deriveDecoder[FindUserDtoOut]
+
+    implicit val AssignUserToRealmDtoInEncoder: Encoder[AssignUserToRealmDtoIn] = deriveEncoder[AssignUserToRealmDtoIn]
+    implicit val AssignUserToRealmDtoOutDecoder: Decoder[AssignUserToRealmDtoOut] =
+      deriveDecoder[AssignUserToRealmDtoOut]
+
   }
 }

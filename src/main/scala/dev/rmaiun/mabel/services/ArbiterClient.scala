@@ -16,8 +16,9 @@ object ArbiterClient {
 
   trait Service {
     def findRealm(realm: String): Task[GetRealmDtoOut]
-    def findPlayer(surname:String): Task[FindUserDtoOut]
+    def findPlayer(surname: String): Task[FindUserDtoOut]
     def addPlayer(dtoIn: RegisterUserDtoIn): Task[RegisterUserDtoOut]
+    def assignUserToRealm(dtoIn: AssignUserToRealmDtoIn): Task[AssignUserToRealmDtoOut]
     def storeGameHistory(dtoIn: AddGameHistoryDtoIn): Task[AddGameHistoryDtoOut]
     def storeEloPoints(dtoIn: AddEloPointsDtoIn): Task[AddEloPointsDtoOut]
     def listGameHistory(realm: String, season: String): Task[ListGameHistoryDtoOut]
@@ -38,6 +39,12 @@ object ArbiterClient {
       val uri     = baseUri / "users" / "register"
       val request = Request[Task](POST, uri).withEntity(dtoIn)
       client.expect[RegisterUserDtoOut](request)
+    }
+
+    override def assignUserToRealm(dtoIn: AssignUserToRealmDtoIn): Task[AssignUserToRealmDtoOut] = {
+      val uri     = baseUri / "users" / "assignToRealm"
+      val request = Request[Task](POST, uri).withEntity(dtoIn)
+      client.expect[AssignUserToRealmDtoOut](request)
     }
 
     override def storeGameHistory(dtoIn: AddGameHistoryDtoIn): Task[AddGameHistoryDtoOut] = {

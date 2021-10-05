@@ -15,7 +15,7 @@ services:
       - '3306'
   rabbit_arbiter:
     container_name: rabbit_arbiter
-    image: "rabbitmq:3-management"
+    image: "rabbitmq:3.8-management"
     environment:
       RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
       RABBITMQ_DEFAULT_USER: "rabbitmq"

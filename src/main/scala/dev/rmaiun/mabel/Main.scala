@@ -71,9 +71,12 @@ object Main extends App {
         .consume(queue = "input_q", consumerTag = "test")
         .mapM { record =>
           val deliveryTag = record.getEnvelope.getDeliveryTag
-          Log.info(s"Received $deliveryTag: ${new String(record.getBody)}") *>
-            CommandHandler.process(record) *>
-            channel.ack(deliveryTag)
+          for{
+            _ <- Log.info(s"Received $deliveryTag: ${new String(record.getBody)}")
+            x <- CommandHandler.process(record)
+            _ <- Log.info(x)
+            _ <- channel.ack(deliveryTag)
+          } yield ()
         }
 //      .take(5)
         .runDrain
