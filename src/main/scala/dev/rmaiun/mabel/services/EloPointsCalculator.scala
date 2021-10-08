@@ -39,15 +39,15 @@ object EloPointsCalculator {
         val kL1 = findK(l1.value, l1.gamesPlayed)
         val kL2 = findK(l2.value, l2.gamesPlayed)
 
-        val ratingW1 = eloAlgorithmRun(w1.value, avgLosePoints, kW1, d = true)
-        val ratingW2 = eloAlgorithmRun(w2.value, avgLosePoints, kW2, d = true)
-        val ratingL1 = eloAlgorithmRun(avgWinPoints, l1.value, kL1, d = false)
-        val ratingL2 = eloAlgorithmRun(avgWinPoints, l2.value, kL2, d = false)
+        val ratingW1 = eloAlgorithmRunWin(w1.value, avgLosePoints, kW1)
+        val ratingW2 = eloAlgorithmRunWin(w2.value, avgLosePoints, kW2)
+        val ratingL1 = eloAlgorithmRunLose(avgWinPoints, l1.value, kL1)
+        val ratingL2 = eloAlgorithmRunLose(avgWinPoints, l2.value, kL2)
         UserCalculatedPoints(
-          CalculatedPoints(w1.user, ratingW1),
-          CalculatedPoints(w2.user, ratingW2),
-          CalculatedPoints(l1.user, ratingL1),
-          CalculatedPoints(l2.user, ratingL2)
+          CalculatedPoints(w1.user, ratingW1 - w1.value),
+          CalculatedPoints(w2.user, ratingW2 - w2.value),
+          CalculatedPoints(l1.user, ratingL1 - l1.value),
+          CalculatedPoints(l2.user, ratingL2 - l2.value)
         )
       }
 
@@ -62,20 +62,22 @@ object EloPointsCalculator {
       }
     }
 
-    private def eloAlgorithmRun(rA: Int, rB: Int, k: Int, d: Boolean): Int = {
-      val  pB = probability(rA, rB)
-      val pA = probability(rB, rA)
-      val winnerPoints = if (d) {
-        rA + k * (1 - pA)
-      } else {
-        rB + k * (1 - pB)
-      }
+    private def eloAlgorithmRunWin(rA: Int, rB: Int, k: Int): Int = {
+      val eA           = expectedRating(rB - rA)
+      val winnerPoints = rA + k * (1 - eA)
       Math.round(winnerPoints)
     }
 
-    private def probability(rating1: Int, rating2: Int): Float = {
-      val divisor = Math.pow(10, 1.0f * (rating1 - rating2) / 400).toFloat
-      1.0f * 1.0f / (1 + 1.0f * divisor)
+    private def eloAlgorithmRunLose(rA: Int, rB: Int, k: Int): Int = {
+      val eB          = expectedRating(rA - rB)
+      val loserPoints = rB + k * (0 - eB)
+      Math.round(loserPoints)
+    }
+
+    private def expectedRating(ratingDiff: Float): Float = {
+      val ratingDiffDivided = ratingDiff / 400
+      val divisor           = Math.pow(10, 1.0f * ratingDiffDivided).toFloat
+      1.0f / (1 + divisor)
     }
 
     private def findK(rating: Int, games: Int): Int =
