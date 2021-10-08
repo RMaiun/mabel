@@ -22,11 +22,11 @@ object EloPointsCalculator {
         loadedPoints <- loadEloPoints(dto)
       } yield {
         val avgWinPoints = loadedPoints.calculatedEloPoints
-          .filter(x => List(dto.w1, dto.w2).contains(x))
+          .filter(x => List(dto.w1, dto.w2).contains(x.user))
           .map(_.value)
           .sum / 2
         val avgLosePoints = loadedPoints.calculatedEloPoints
-          .filter(x => List(dto.l1, dto.l2).contains(x))
+          .filter(x => List(dto.l1, dto.l2).contains(x.user))
           .map(_.value)
           .sum / 2
         val w1 = loadedPoints.calculatedEloPoints.filter(x => x.user == dto.w1).head
@@ -63,7 +63,7 @@ object EloPointsCalculator {
     }
 
     private def eloAlgorithmRun(rA: Int, rB: Int, k: Int, d: Boolean): Int = {
-      val pB = probability(rA, rB)
+      val  pB = probability(rA, rB)
       val pA = probability(rB, rA)
       val winnerPoints = if (d) {
         rA + k * (1 - pA)

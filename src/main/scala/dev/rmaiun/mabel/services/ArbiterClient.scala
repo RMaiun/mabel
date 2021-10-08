@@ -70,7 +70,7 @@ object ArbiterClient {
     override def listCalculatedEloPoints(users: List[String]): Task[ListEloPointsDtoOut] = {
       val uri = baseUri / "games" / "eloPoints" / "listCalculated"
       val uriWithParams = uri
-        .withQueryParam("users", users)
+        .withQueryParam("users", users.mkString(","))
       client.expect[ListEloPointsDtoOut](uriWithParams)
     }
 

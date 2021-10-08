@@ -27,7 +27,6 @@ object CommandHandler {
         json      <- Task.fromEither(parse(new String(record.getBody)))
         _ <- Log.info(json.toString())
         input     <- Task.fromEither(value)
-        _ <- Log.info(input.toString)
         processor <- strategy.selectProcessor(input.cmd)
         result    <- processor.process(input)
         _         <- Log.info(result.botResponse.result)

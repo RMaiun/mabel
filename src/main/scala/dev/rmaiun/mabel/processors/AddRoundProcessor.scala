@@ -17,26 +17,22 @@ import zio._
 case class AddRoundProcessor(arbiterClient: ArbiterClient.Service, eloPointsCalculator: EloPointsCalculator.Service)
     extends Processor {
   private implicit val log: Logger = LoggerFactory.getLogger(AddRoundProcessor.getClass)
-//  override def process(input: BotRequest): Task[ProcessorResponse] =
-//    for {
-//      dto           <- parseDto[AddRoundCmd](input.data)
-//      w1            <- loadPlayer(dto.w1)
-//      w2            <- loadPlayer(dto.w2)
-//      l1            <- loadPlayer(dto.l1)
-//      l2            <- loadPlayer(dto.l2)
-//      userPoints    <- calculateEloPoints(w1, w2, l1, l2)
-//      pointsIdList  <- storeEloPoints(userPoints, dto.moderator)
-//      _             <- Log.info(s"Elo points were successfully stored with id: ${pointsIdList.mkString("[", ",", "]")}")
-//      storedHistory <- storeHistory(dto)
-//    } yield {
-//      val msg = formatMessage(storedHistory.storedRound.id, storedHistory.storedRound.realm)
-//      ProcessorResponse.ok(input.chatId, IdGenerator.msgId, msg)
-//    }
 
-
-  override def process(input: BotRequest): Task[ProcessorResponse] = {
-    Task.succeed(ProcessorResponse.ok(BotResponse(input.chatId, 1234, "test")))
-  }
+  override def process(input: BotRequest): Task[ProcessorResponse] =
+    for {
+      dto           <- parseDto[AddRoundCmd](input.data)
+      w1            <- loadPlayer(dto.w1)
+      w2            <- loadPlayer(dto.w2)
+      l1            <- loadPlayer(dto.l1)
+      l2            <- loadPlayer(dto.l2)
+      userPoints    <- calculateEloPoints(w1, w2, l1, l2)
+      pointsIdList  <- storeEloPoints(userPoints, dto.moderator)
+      _             <- Log.info(s"Elo points were successfully stored with id: ${pointsIdList.mkString("[", ",", "]")}")
+      storedHistory <- storeHistory(dto)
+    } yield {
+      val msg = formatMessage(storedHistory.storedRound.id, storedHistory.storedRound.realm)
+      ProcessorResponse.ok(input.chatId, IdGenerator.msgId, msg)
+    }
 
   private def formatMessage(id: Long, realm: String): String =
     s"$PREFIX New game was stored with id $id for realm $realm $SUFFIX"
